@@ -5,25 +5,22 @@ import { useActionState } from 'react'
 import { FormAlert } from '@/components/form-alert'
 import { SubmitButton } from '@/components/submit-button'
 import { TextField } from '@/components/text-field'
-import { registerAction, type RegisterState } from './actions'
-import { MAX_EMAIL_LENGTH, MAX_PASSWORD_BYTES, MIN_PASSWORD_LENGTH } from './constants'
+import { loginAction, type LoginState } from './actions'
+import { MAX_EMAIL_LENGTH } from '../register/constants'
 
-const initialState: RegisterState = {}
+const initialState: LoginState = {}
 
-const ERROR_ID = 'register-error'
+const ERROR_ID = 'login-error'
 
-export default function RegisterPage() {
-  const [state, formAction, pending] = useActionState(registerAction, initialState)
+export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(loginAction, initialState)
   const hasError = Boolean(state?.error)
 
   return (
     <main className="flex min-h-screen items-center justify-center p-8">
       <form action={formAction} className="w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-semibold">Create your account</h1>
+        <h1 className="text-xl font-semibold">Log in</h1>
 
-        {/* A disabled fieldset switches off every control at once. Disabling
-            only the button still lets Enter inside a text field fire a second
-            submit, which burns another signup attempt against the rate limit. */}
         <fieldset disabled={pending} className="space-y-4">
           <TextField
             id="email"
@@ -37,29 +34,30 @@ export default function RegisterPage() {
             describedBy={ERROR_ID}
           />
 
+          {/* current-password, not new-password: this field reads an existing
+              credential, so password managers should offer to fill it rather
+              than generate a new one. No length limits either — those belong to
+              registration, and applying them here would lock out accounts
+              created under a different rule. */}
           <TextField
             id="password"
             name="password"
             label="Password"
             type="password"
-            autoComplete="new-password"
-            minLength={MIN_PASSWORD_LENGTH}
-            maxLength={MAX_PASSWORD_BYTES}
+            autoComplete="current-password"
             invalid={hasError}
             describedBy={ERROR_ID}
           />
 
           <FormAlert id={ERROR_ID} message={state?.error} attempt={state?.attempt} />
 
-          <SubmitButton pending={pending} label="Register" pendingLabel="Registering..." />
+          <SubmitButton pending={pending} label="Log in" pendingLabel="Logging in..." />
         </fieldset>
 
-        {/* Gives the "This email is already registered." error somewhere to go —
-            without it that message is a dead end. */}
         <p className="text-sm">
-          Already have an account?{' '}
-          <Link href="/login" className="underline">
-            Log in
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="underline">
+            Register
           </Link>
         </p>
       </form>
